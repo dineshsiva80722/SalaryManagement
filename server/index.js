@@ -21,6 +21,11 @@ app.get('/api/payroll', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+app.get('/api/batches/:batchId/details', (req, res) => {
+  const { batchId } = req.params;
+  const { courseId } = req.query;
+  // Fetch and return the batch details based on batchId and courseId
+});
 
 // Add new payroll record
 app.post('/api/payroll', async (req, res) => {

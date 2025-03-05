@@ -8,6 +8,26 @@ export async function getCourses() {
   return response.json();
 }
 
+
+// export const getBatchDetails = async (courseId: string, batchId: string) => {
+//   const response = await fetch(`${API_URL}/batches/${batchId}/details?courseId=${courseId}`);
+//   console.log('Fetching batch details for:', { courseId, batchId }); // Log the parameters
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch batch details');
+//   }
+//   return await response.json();
+// };
+
+
+export const getBatchDetails = async (courseId: string, batchId: string) => {
+  const response = await fetch(`${API_URL}/batches/${batchId}/details?courseId=${courseId}`);
+  console.log('Fetching batch details for:', { courseId, batchId }); // Log the parameters
+  if (!response.ok) {
+    throw new Error('Failed to fetch batch details');
+  }
+  return await response.json();
+};
+
 export async function createCourse(data: { name: string; description: string }) {
   const response = await fetch(`${API_URL}/courses`, {
     method: 'POST',
