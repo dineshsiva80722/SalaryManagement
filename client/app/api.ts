@@ -68,20 +68,15 @@ export async function updateCourse(courseId: string, data: { name?: string; desc
 
 export async function deleteCourse(courseId: string) {
   if (!courseId) {
-    throw new Error('Course ID is required');
+    throw new Error("Invalid course ID format");
   }
 
-  const response = await fetch(`${API_URL}/courses/${courseId}`, {
+  const response = await fetch(`/api/courses/${courseId}`, {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json'
-    }
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Failed to delete course');
+    throw new Error(error.message || "Failed to delete course");
   }
-
-  return response.json();
-} 
+}

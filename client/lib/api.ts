@@ -341,22 +341,46 @@ export async function updateBatch(
 //   }
 // }
 
-export async function deleteBatch(courseId: string, batchId: string): Promise<void> {
-  console.log("Deleting batch with ID:", batchId, "for course:", courseId);
-  console.log(`${API_BASE_URL}/courses/${courseId}/batches/${batchId}`);
+// export const deleteBatch = async (batchId: string, courseId: string) => {
+//   const response = await fetch(`${API_BASE_URL}/courses/${courseId}/batches/${batchId}`, {
+//     method: 'DELETE',
+//   });
+//   if (!response.ok) {
+//     throw new Error('Failed to delete batch');
+//   }
+//   return response.json();
+// };
 
+export const deleteBatch = async (courseId: string, batchId: string) => {
   const response = await fetch(`${API_BASE_URL}/courses/${courseId}/batches/${batchId}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    method: 'DELETE',
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: "Failed to delete batch" }));
-    throw new Error(errorData.message || "Failed to delete batch");
+    const errorMessage = await response.text();
+    throw new Error(`Failed to delete batch: ${errorMessage}`);
   }
-}
+  
+  return response.json();
+};
+
+
+// export async function deleteBatch(courseId: string, batchId: string): Promise<void> {
+//   console.log("Deleting batch with ID:", batchId, "for course:", courseId);
+//   console.log(`${API_BASE_URL}/courses/${courseId}/batches/${batchId}`);
+
+//   const response = await fetch(`${API_BASE_URL}/courses/${courseId}/batches/${batchId}`, {
+//     method: "DELETE",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//   });
+
+//   if (!response.ok) {
+//     const errorData = await response.json().catch(() => ({ message: "Failed to delete batch" }));
+//     throw new Error(errorData.message || "Failed to delete batch");
+//   }
+// }
 
 
 export async function getMonthlyBatches(courseId: string, month: string): Promise<Batch[]> {
@@ -437,26 +461,56 @@ export async function deleteBatchCourse(
   }
 }
 
+// export async function addBatchCourse(
+//   courseId: string,
+//   batchId: string,
+//   newCourse: Omit<BatchCourse, "id">,
+// ): Promise<BatchCourse> {
+//   const response = await fetch(
+//     `${API_BASE_URL}/courses/${courseId}/batches/${batchId}/courses`,
+//     {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(newCourse),
+//     }
+//   );
+//   if (!response.ok) {
+//     throw new Error('Failed to add batch course');
+//   }
+//   return response.json();
+// }
+
 export async function addBatchCourse(
   courseId: string,
   batchId: string,
   newCourse: Omit<BatchCourse, "id">,
 ): Promise<BatchCourse> {
-  const response = await fetch(
-    `${API_BASE_URL}/courses/${courseId}/batches/${batchId}/courses`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newCourse),
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/${courseId}/batches/${batchId}/courses`, // Ensure correct URL structure
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newCourse),
+      }
+    );
+
+    if (!response.ok) {
+      const errorMessage = await response.text(); // Get error details from response
+      throw new Error(`Failed to add batch course: ${errorMessage}`);
     }
-  );
-  if (!response.ok) {
-    throw new Error('Failed to add batch course');
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error adding batch course:", error);
+    throw error;
   }
-  return response.json();
 }
+
 
 export async function getUsers(): Promise<User[]> {
   const response = await fetch(`${API_BASE_URL}/users`);

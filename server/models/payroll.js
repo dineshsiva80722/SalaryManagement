@@ -72,6 +72,7 @@ const courseSchema = new mongoose.Schema({
     year: { type: Number, required: true },
     month: { type: Number, required: true },
     courses: [{
+      _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
       name: { type: String, required: true },
       lectureName: { type: String, required: true },
       workStatus: { 

@@ -62,26 +62,61 @@ export default function CourseManagement() {
     }
   }
 
-  const handleUpdateCourse = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (!editingCourse) return
+  // const handleUpdateCourse = async (e: React.MouseEvent) => {
+  //   e.preventDefault()
+  //   if (!editingCourse) return
     
-    try {
-      setError(null)
-      if (!editingCourse.name || !editingCourse.description) {
-        throw new Error("Course name and description are required")
-      }
-      const updatedCourse = await updateCourse(editingCourse.id, editingCourse)
-      if (!updatedCourse) {
-        throw new Error("Failed to update course")
-      }
-      setEditingCourse(null)
-      await fetchCourses()
-    } catch (err) {
-      console.error("Error updating course:", err)
-      setError(err instanceof Error ? err.message : "Failed to update course. Please try again.")
+  //   try {
+  //     setError(null)
+  //     if (!editingCourse.name || !editingCourse.description) {
+  //       throw new Error("Course name and description are required")
+  //     }
+  //     const updatedCourse = await updateCourse(editingCourse.id, editingCourse)
+  //     if (!updatedCourse) {
+  //       throw new Error("Failed to update course")
+  //     }
+  //     setEditingCourse(null)
+  //     await fetchCourses()
+  //   } catch (err) {
+  //     console.error("Error updating course:", err)
+  //     setError(err instanceof Error ? err.message : "Failed to update course. Please try again.")
+  //   }
+  // }
+const handleUpdateCourse = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  if (!editingCourse) return;
+
+  try {
+    setError(null);
+
+    // Validation
+    if (!editingCourse.name || !editingCourse.description) {
+      throw new Error("Course name and description are required");
     }
+
+    // Ensure correct course ID
+    const courseId = editingCourse._id || editingCourse.id;
+    if (!courseId) {
+      throw new Error("Invalid course ID");
+    }
+
+    // ✅ Update course
+    const updatedCourse = await updateCourse(courseId, editingCourse);
+    if (!updatedCourse) {
+      throw new Error("Failed to update course");
+    }
+
+    // Reset state after successful update
+    setEditingCourse(null);
+
+    // ✅ Fetch updated course list
+    fetchCourses().catch(err => console.error("Error fetching courses:", err));
+  } catch (err) {
+    console.error("Error updating course:", err);
+    setError(err instanceof Error ? err.message : "Failed to update course. Please try again.");
   }
+};
+
 
   // const handleDeleteCourse = async (id: string) => {
   //   if (!window.confirm("Are you sure you want to delete this course?")) return
@@ -99,19 +134,22 @@ export default function CourseManagement() {
   //   }
   // }
 
-  const handleDeleteCourse = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this course?")) return;
+
+  const handleDeleteCourse = async (courseId: string) => {
+    console.log("Attempting to delete course with ID:", courseId); // Debugging line
+  
+    if (!courseId) {
+      console.error("Invalid course ID format");
+      return;
+    }
   
     try {
-      setError(null);
-      await deleteCourse(id); // Removed unnecessary `result` check
-      await fetchCourses();
-    } catch (err) {
-      console.error("Error deleting course:", err);
-      setError("Failed to delete course. Please try again.");
+      await deleteCourse(courseId);
+      await fetchCourses(); // Refresh the course list after deletion
+    } catch (error) {
+      console.error("Error deleting course:", error);
     }
   };
-  
 
   if (loading) {
     return (

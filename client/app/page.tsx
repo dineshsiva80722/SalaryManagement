@@ -25,9 +25,12 @@ export default function Home() {
           break
         case 'admin':
           router.push('/admin/dashboard')
+          // router.push('/lecturer/dashboard')
           break
         case 'lecturer':
           router.push('/lecturer/dashboard')
+          // router.push('/admin/dashboard')
+
           break
         default:
           router.push('/login')

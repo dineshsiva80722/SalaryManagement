@@ -21,11 +21,7 @@ app.get('/api/payroll', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-app.get('/api/batches/:batchId/details', (req, res) => {
-  const { batchId } = req.params;
-  const { courseId } = req.query;
-  // Fetch and return the batch details based on batchId and courseId
-});
+
 
 // Add new payroll record
 app.post('/api/payroll', async (req, res) => {
@@ -61,25 +57,44 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/users', async (req, res) => {
   try {
     console.log('Received user creation request:', req.body);
-    
+
     const user = new User({
       username: req.body.username,
       password: req.body.password,
       role: req.body.role
     });
-    
+
     console.log('Created user model:', user);
     const newUser = await user.save();
     console.log('Saved user to database:', newUser);
-    
+
     // Verify the user was created
     const savedUser = await User.findById(newUser._id);
     console.log('Retrieved saved user:', savedUser);
-    
+
     res.status(201).json(newUser);
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(400).json({ message: error.message });
+  }
+});
+
+app.post('/api/save-course-details', async (req, res) => {
+  const { courseName, lecturerName, salary, paidAmount, paymentStatus } = req.body;
+
+  const newCourseDetail = new CourseDetail({
+    courseName,
+    lecturerName,
+    salary,
+    paidAmount,
+    paymentStatus,
+  });
+
+  try {
+    await newCourseDetail.save();
+    res.status(201).send('Course details saved successfully');
+  } catch (error) {
+    res.status(500).send('Error saving course details');
   }
 });
 
@@ -110,12 +125,12 @@ app.post('/api/courses', async (req, res) => {
     if (!name || !description) {
       return res.status(400).json({ message: 'Name and description are required' });
     }
-    
+
     const newCourse = new Course({
       name,
       description
     });
-    
+
     const savedCourse = await newCourse.save();
     res.status(201).json(savedCourse);
   } catch (error) {
@@ -124,56 +139,97 @@ app.post('/api/courses', async (req, res) => {
   }
 });
 
-app.patch('/api/courses/:id', async (req, res) => {
+// app.patch('/api/courses/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { name, description } = req.body;
+
+//     if (!name && !description) {
+//       return res.status(400).json({ message: 'At least one field to update is required' });
+//     }
+
+//     const updatedCourse = await Course.findByIdAndUpdate(
+//       id,
+//       {
+//         ...(name && { name }),
+//         ...(description && { description }),
+//         updatedAt: Date.now()
+//       },
+//       { new: true }
+//     );
+
+//     if (!updatedCourse) {
+//       return res.status(404).json({ message: 'Course not found' });
+//     }
+
+//     res.json(updatedCourse);
+//   } catch (error) {
+//     console.error('Error updating course:', error);
+//     res.status(400).json({ message: error.message });
+//   }
+// });
+
+// ✅ Update Course
+app.put('/api/courses/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description } = req.body;
-    
-    if (!name && !description) {
-      return res.status(400).json({ message: 'At least one field to update is required' });
-    }
-    
-    const updatedCourse = await Course.findByIdAndUpdate(
-      id,
-      { 
-        ...(name && { name }),
-        ...(description && { description }),
-        updatedAt: Date.now()
-      },
-      { new: true }
-    );
-    
-    if (!updatedCourse) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-    
-    res.json(updatedCourse);
-  } catch (error) {
-    console.error('Error updating course:', error);
-    res.status(400).json({ message: error.message });
-  }
-});
 
-app.delete('/api/courses/:id', async (req, res) => {
-  try {
-    const { id } = req.params.id;
-    
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Invalid course ID format' });
     }
 
-    const deletedCourse = await Course.findByIdAndDelete(id);
-    
-    if (!deletedCourse) {
+    const updatedCourse = await Course.findByIdAndUpdate(
+      id,
+      { name, description, updatedAt: Date.now() },
+      { new: true }
+    );
+
+    if (!updatedCourse) {
       return res.status(404).json({ message: 'Course not found' });
     }
-    
-    res.json({ message: 'Course deleted successfully' });
+
+    res.json({ message: 'Course updated successfully', updatedCourse });
   } catch (error) {
-    console.error('Error deleting course:', error);
-    res.status(500).json({ message: 'Internal server error while deleting course' });
+    console.error('Error updating course:', error);
+    res.status(500).json({ message: 'Internal server error while updating course' });
   }
 });
+
+
+// app.delete('/api/courses/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(400).json({ message: 'Invalid course ID format' });
+//     }
+
+//     const deletedCourse = await Course.findByIdAndDelete(id);
+
+//     if (!deletedCourse) {
+//       return res.status(404).json({ message: 'Course not found' });
+//     }
+
+//     res.json({ message: 'Course deleted successfully' });
+//   } catch (error) {
+//     console.error('Error deleting course:', error);
+//     res.status(500).json({ message: 'Internal server error while deleting course' });
+//   }
+// });
+
+app.delete('/api/courses/:id', async (req, res) => {
+  try {
+    const course = await Course.findByIdAndDelete(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    res.json({ message: 'Course deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting course', error });
+  }
+});
+
+
+
 
 // Get available months for a course
 app.get('/api/courses/:courseId/months', async (req, res) => {
@@ -195,7 +251,7 @@ app.get('/api/courses/:courseId/months', async (req, res) => {
 
     // Get unique months
     const months = [...new Set(batches.map(batch => batch.month))].sort((a, b) => a - b);
-    
+
     res.json(months);
   } catch (error) {
     console.error('Error fetching available months:', error);
@@ -231,7 +287,7 @@ app.get('/api/courses/:courseId/', async (req, res) => {
   }
 });
 
-app.put('/api/courses/:courseId', async (req, res) => {
+app.patch('/api/courses/:courseId', async (req, res) => {
   try {
     console.log("Update Request Params:", req.params);
     console.log("Update Request Body:", req.body);
@@ -291,7 +347,7 @@ app.patch('/api/courses/:courseId/batches/:batchId/courses/:courseIndex', async 
     if (!batch) {
       return res.status(404).json({ message: 'Batch not found' });
     }
-    
+
     const courseIndex = parseInt(req.params.courseIndex);
     if (courseIndex < 0 || courseIndex >= batch.courses.length) {
       return res.status(404).json({ message: 'Course not found in batch' });
@@ -316,7 +372,7 @@ app.patch('/api/courses/:courseId/batches/:batchId/courses/:courseIndex', async 
 //     if (!batch) {
 //       return res.status(404).json({ message: 'Batch not found' });
 //     }
-    
+
 //     batch.courses = batch.courses.filter(c => c.id !== req.params.courseId);
 //     await course.save();
 //     res.status(204).send();
@@ -352,22 +408,50 @@ app.delete('/api/courses/:courseId/batches/:batchId', async (req, res) => {
 
 
 // Add batch course
+// app.post('/api/courses/:courseId/batches/:batchId/courses', async (req, res) => {
+//   try {
+//     const course = await Course.findById(req.params.courseId);
+//     if (!course) {
+//       return res.status(404).json({ message: 'Course not found' });
+//     }
+//     const batch = course.batches.id(req.params.batchId);
+//     if (!batch) {
+//       return res.status(404).json({ message: 'Batch not found' });
+//     }
+
+//     batch.courses.push(req.body);
+//     await course.save();
+//     res.status(201).json(batch.courses[batch.courses.length - 1]);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// });
+
 app.post('/api/courses/:courseId/batches/:batchId/courses', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.courseId);
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-    const batch = course.batches.id(req.params.batchId);
-    if (!batch) {
-      return res.status(404).json({ message: 'Batch not found' });
-    }
-    
-    batch.courses.push(req.body);
-    await course.save();
-    res.status(201).json(batch.courses[batch.courses.length - 1]);
+      const course = await Course.findById(req.params.courseId);
+      if (!course) {
+          return res.status(404).json({ message: 'Course not found' });
+      }
+
+      const batch = course.batches.id(req.params.batchId);
+      if (!batch) {
+          return res.status(404).json({ message: 'Batch not found' });
+      }
+
+      // Debugging Log
+      console.log("Incoming Data:", req.body);
+
+      if (!batch.courses) {
+          batch.courses = [];
+      }
+
+      batch.courses.push(req.body);
+      await course.save();
+      
+      res.status(201).json(batch.courses[batch.courses.length - 1]);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+      res.status(400).json({ message: error.message });
   }
 });
 
@@ -432,32 +516,32 @@ app.post('/api/batches', async (req, res) => {
 
     // Validate required fields
     if (!name || !year || !month || !courseId) {
-      return res.status(400).json({ 
-        message: 'Name, year, month, and courseId are required' 
+      return res.status(400).json({
+        message: 'Name, year, month, and courseId are required'
       });
     }
 
     // Validate year and month
     const currentYear = new Date().getFullYear();
     if (year < 2000 || year > currentYear + 1) {
-      return res.status(400).json({ 
-        message: 'Invalid year' 
+      return res.status(400).json({
+        message: 'Invalid year'
       });
     }
     if (month < 1 || month > 12) {
-      return res.status(400).json({ 
-        message: 'Month must be between 1 and 12' 
+      return res.status(400).json({
+        message: 'Month must be between 1 and 12'
       });
     }
 
     app.get('/api/courses/:courseId/batches', async (req, res) => {
       const { courseId } = req.params;
       const { year, month } = req.query;
-    
+
       if (!courseId || !year || !month) {
         return res.status(400).json({ error: 'Course ID, year, and month are required' });
       }
-    
+
       try {
         const batches = await getBatchesByCourseYearAndMonth(courseId, parseInt(year), parseInt(month));
         if (!batches || !Array.isArray(batches)) {
@@ -478,19 +562,19 @@ app.post('/api/batches', async (req, res) => {
     }
 
     // Check if a batch with the same name already exists for this course
-    const batchExists = course.batches.some(batch => 
-      batch.name === name && 
-      batch.year === year && 
+    const batchExists = course.batches.some(batch =>
+      batch.name === name &&
+      batch.year === year &&
       batch.month === month
     );
-    
+
     if (batchExists) {
-      return res.status(400).json({ 
-        message: 'A batch with this name already exists for this course in the specified month and year' 
+      return res.status(400).json({
+        message: 'A batch with this name already exists for this course in the specified month and year'
       });
     }
 
-    
+
 
     // Create the new batch
     const newBatch = {
@@ -512,22 +596,53 @@ app.post('/api/batches', async (req, res) => {
     res.status(201).json(createdBatch);
   } catch (error) {
     console.error('Error creating batch:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Internal server error while creating batch'
     });
   }
 });
 
-// Batch Salary Routes
+// // Batch Salary Routes
+// app.get('/api/batch-salary-data', async (req, res) => {
+//   try {
+//     const batchSalaryData = await BatchSalary.find().sort({ year: -1, month: -1 });
+//     res.json(batchSalaryData);
+//   } catch (error) {
+//     console.error('Error fetching batch salary data:', error);
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
 app.get('/api/batch-salary-data', async (req, res) => {
   try {
-    const batchSalaryData = await BatchSalary.find().sort({ year: -1, month: -1 });
-    res.json(batchSalaryData);
+    const batchSalaryData = await Course.find().sort({ year: -1, month: -1 });
+
+    // Transform data for the dashboard
+    const formattedData = batchSalaryData.map(course =>
+      course.batches.flatMap(batch =>
+        batch.courses.map(lecture => ({
+          courseName: course.name,
+          batchName: batch.name,
+          year: batch.year,
+          month: batch.month,
+          lectureName: lecture.lectureName,
+          lectureCourse: lecture.name,
+          salary: lecture.salary,
+          paidAmount: lecture.paidAmount,
+          paymentStatus: lecture.paymentStatus
+        }))
+      )
+    ).flat(); // Flatten the array
+
+    console.log(formattedData)
+
+    res.json(formattedData);
   } catch (error) {
     console.error('Error fetching batch salary data:', error);
     res.status(500).json({ message: error.message });
   }
 });
+
 
 app.post('/api/batch-salary-data', async (req, res) => {
   try {
@@ -575,7 +690,7 @@ app.patch('/api/batch-details/:id', async (req, res) => {
   try {
     const { id } = req.params;
     console.log('Attempting to update batch detail with ID:', id);
-    
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       console.error('Invalid batch detail ID format:', id);
       return res.status(400).json({ message: 'Invalid batch detail ID format' });
@@ -611,7 +726,7 @@ app.get('/api/test-db', async (req, res) => {
     const collections = await mongoose.connection.db.collections();
     console.log('Connected to database:', dbName);
     console.log('Available collections:', collections.map(c => c.collectionName));
-    res.json({ 
+    res.json({
       database: dbName,
       collections: collections.map(c => c.collectionName),
       connectionState: mongoose.connection.readyState

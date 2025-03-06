@@ -12,11 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { updateScheduleItem } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 
-interface MonthlyScheduleTableProps {
-  schedule: ScheduleItem[];
-}
-
-interface ScheduleItem {
+export interface ScheduleItem {
   id: string;
   batch: string;
   courseTitle: string;
@@ -25,11 +21,40 @@ interface ScheduleItem {
   paymentStatus: string;
 }
 
+
+
+
+interface MonthlyScheduleTableProps {
+    schedule: ScheduleItem[];
+    courseId: string;
+    onSelectMonth: (month: number) => void;
+    selectedMonth: number | null; // Add this line
+}
+
+// interface ScheduleItem {
+//   id: string;
+//   batch: string;
+//   courseTitle: string;
+//   lectureName: string;
+//   worksheetStatus: string;
+//   paymentStatus: string;
+// }
+
+
+interface MonthlyScheduleTableProps {
+    schedule: ScheduleItem[];
+    courseId: string; // Existing line
+    onSelectMonth: (month: number) => void; // Add this line
+}
+
 export default function MonthlyScheduleTable({ schedule = [] }: MonthlyScheduleTableProps) { // Ensure schedule is not undefined
   const router = useRouter()
 
   interface MonthlyScheduleTableProps {
-    schedule: ScheduleItem[];
+      schedule: ScheduleItem[]; // This is required
+      courseId: string;
+      onSelectMonth: (month: number) => void;
+      selectedMonth: number | null;
   }
 
   const handleStatusChange = async (id: string, field: string, value: string): Promise<void> => {
