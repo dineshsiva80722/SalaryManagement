@@ -405,6 +405,34 @@ app.delete('/api/courses/:courseId/batches/:batchId', async (req, res) => {
   }
 });
 
+app.delete('/api/extracourse/:extracourseId/:batchId', async (req, res) => {
+  try {
+    const { extracourseId, batchId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(extracourseId) || !mongoose.Types.ObjectId.isValid(batchId)) {
+      return res.status(400).json({ message: 'Invalid course or batch ID format' });
+    }
+
+    // Find and update the course by pulling the batch from the array
+    const updatedCourse = await Course.findByIdAndUpdate(
+      extracourseId,
+      { $pull: { batches: { _id: batchId } } },
+      { new: true }
+    );
+
+    if (!updatedCourse) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    res.status(200).json({ message: "Batch deleted successfully", course: updatedCourse });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
+
 
 
 // Add batch course
@@ -786,7 +814,78 @@ app.patch('/api/courses/:courseId/batches/:batchId', async (req, res) => {
   }
 });
 
+// extraaa course
 
+app.get('/api/extracourse/:courseId/:batchId', async (req, res) => {
+  try {
+    const { courseId, batchId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(batchId)) {
+      return res.status(400).json({ message: 'Invalid course or batch ID format' });
+    }
+
+    // Fetch the extra course details
+    const extraCourseDetails = await Course.findById(courseId).populate('batches');
+
+    if (!extraCourseDetails) {
+      return res.status(404).json({ message: 'Extra course not found' });
+    }
+
+    // Filter the batches to find the specific batch
+    const batchDetails = extraCourseDetails.batches.find(batch => batch.id === batchId);
+
+    if (!batchDetails) {
+      return res.status(404).json({ message: 'Batch not found in extra course' });
+    }
+
+    res.status(200).json(batchDetails);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+app.get('/api/extracourse/:courseId/:batchId', async (req, res) => {
+  try {
+    const { courseId, batchId } = req.params;
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(batchId)) {
+      return res.status(400).json({ message: 'Invalid course or batch ID format' });
+    }
+
+    // Fetch the extra course details
+    const extraCourseDetails = await Course.findById(courseId).populate('batches');
+
+    if (!extraCourseDetails) {
+      return res.status(404).json({ message: 'Extra course not found' });
+    }
+
+    // Filter the batches to find the specific batch
+    const batchDetails = extraCourseDetails.batches.find(batch => batch._id.toString() === batchId);
+
+    if (!batchDetails) {
+      return res.status(404).json({ message: 'Batch not found in extra course' });
+    }
+
+    res.status(200).json(batchDetails);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+app.delete('/api/extracourse/:courseId/:batchId', async (req, res) => {
+  const { courseId, batchId } = req.params;
+  try {
+    // Logic to delete the course from the batch in your database
+    // For example, using Mongoose:
+    await Course.findByIdAndDelete(courseId); // Adjust as necessary
+    res.json({ message: 'Course deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 
@@ -794,4 +893,37 @@ app.patch('/api/courses/:courseId/batches/:batchId', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+
+app.get('/api/extracourse/:courseId/:batchId', async (req, res) => {
+  try {
+    const { courseId, batchId } = req.params;
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(batchId)) {
+      return res.status(400).json({ message: 'Invalid course or batch ID format' });
+    }
+
+    // Fetch the course and populate batches
+    const course = await Course.findById(courseId).populate('batches');
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // Find the specific batch
+    const batch = course.batches.find(batch => batch._id.toString() === batchId);
+
+    if (!batch) {
+      return res.status(404).json({ message: 'Batch not found' });
+    }
+
+    // Extract only the `_id` values from the courses
+    const courseIds = batch.courses.map(course => course._id);
+
+    res.status(200).json({ courseIds });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });

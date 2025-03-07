@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getBatchSalaryData } from "@/lib/api";
 
+
 interface BatchSalaryData {
   id: string;
   courseName: string;
@@ -19,6 +20,7 @@ interface BatchSalaryData {
   paidAmount: number;
   paymentStatus: "Pending" | "Paid";
 }
+
 
 export default function BatchSalaryOverview() {
   const [batchSalaryData, setBatchSalaryData] = useState<BatchSalaryData[]>([]);
@@ -89,7 +91,7 @@ export default function BatchSalaryOverview() {
     return <div>Error: {error}</div>;
   }
 
-  
+
 
   return (
     <div className="space-y-4">
@@ -130,6 +132,7 @@ export default function BatchSalaryOverview() {
         </div>
         <div className="rounded-md border mt-4">
           <Table>
+            
             <TableHeader>
               <TableRow>
                 <TableHead>Course Name</TableHead>
@@ -143,21 +146,23 @@ export default function BatchSalaryOverview() {
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-  {sortedAndFilteredData.map((item) => (
-    <TableRow key={item.id}>
-      <TableCell>{item.courseName}</TableCell>
-      <TableCell>{item.batchName}</TableCell>
-      <TableCell>{item.year}</TableCell>
-      <TableCell>{new Date(2000, item.month - 1).toLocaleString("default", { month: "long" })}</TableCell>
-      <TableCell>{item.lectureName}</TableCell> {/* Ensure this is correctly referenced */}
-      <TableCell>{item.lectureCourse}</TableCell> {/* Ensure this is correctly referenced */}
-      <TableCell>{item.salary}</TableCell>
-      <TableCell>{item.paidAmount}</TableCell>
-      <TableCell>{item.paymentStatus}</TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+              {sortedAndFilteredData.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.courseName}</TableCell>
+                  <TableCell>{item.batchName}</TableCell>
+                  <TableCell>{item.year}</TableCell>
+                  <TableCell>{new Date(2000, item.month - 1).toLocaleString("default", { month: "long" })}</TableCell>
+                  <TableCell>{item.lectureName}</TableCell> {/* Ensure this is correctly referenced */}
+                  <TableCell>{item.lectureCourse}</TableCell> {/* Ensure this is correctly referenced */}
+                  <TableCell>{item.salary}</TableCell>
+                  <TableCell>{item.paidAmount}</TableCell>
+                  <TableCell>{item.paymentStatus}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            
           </Table>
         </div>
       </div>

@@ -36,6 +36,8 @@ interface Batch {
   courses: BatchCourse[]
 }
 
+
+
 interface User {
   id: string
   username: string
@@ -208,7 +210,7 @@ export async function updateCourse(id: string, updates: Partial<Course>): Promis
 //       'Content-Type': 'application/json'
 //     }
 //   });
-  
+
 //   if (!response.ok) {
 //     const errorData = await response.json().catch(() => ({ message: 'Failed to delete course' }));
 //     throw new Error(errorData.message || 'Failed to delete course');
@@ -233,7 +235,7 @@ export async function deleteCourse(id: string): Promise<void> {
 
 export async function getBatches(courseId: string, year?: number, month?: number): Promise<Batch[]> {
   let url = `${API_BASE_URL}/courses/${courseId}/batches`;
-  
+
   // Add query parameters if year or month is provided
   const params = new URLSearchParams();
   if (year !== undefined) params.append('year', year.toString());
@@ -360,7 +362,7 @@ export const deleteBatch = async (courseId: string, batchId: string) => {
     const errorMessage = await response.text();
     throw new Error(`Failed to delete batch: ${errorMessage}`);
   }
-  
+
   return response.json();
 };
 
@@ -630,6 +632,9 @@ export async function getBatchSalaryData(): Promise<BatchSalaryData[]> {
   return response.json();
 }
 
+
+
+
 export async function updateBatchDetail(
   id: string,
   updates: Partial<BatchDetail>
@@ -658,7 +663,7 @@ export async function getAvailableMonths(courseId: string, year: number): Promis
 
 export async function getAvailableBatches(courseId: string, year: number, month: number): Promise<Batch[]> {
   const response = await fetch(`${API_BASE_URL}/courses/${courseId}/batches?year=${year}&month=${month}`);
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch available batches');
   }
@@ -691,5 +696,123 @@ export async function updateScheduleItem(id: string, data: any): Promise<void> {
     return await response.json();
   } catch (error) {
     console.error('Error updating schedule item:', error);
+  }
+}
+
+interface extracourse {
+  id: string
+  name: string
+  lectureName: string
+  salary: number
+  paidAmount: number
+  paymentStatus: PaymentStatus
+  paymentScreenshot?: string
+}
+
+// export async function getExtraCourseDetails(courseId: string, batchId: string): Promise<extracourse> {
+//   const response = await fetch(`${API_BASE_URL}/extracourse/${courseId}/${batchId}`);
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch extra course details');
+//   }
+//   return response.json();
+// }
+
+// export async function deleteExtraCourse(courseId: string, batchId: string): Promise<{ message: string }> {
+//   const response = await fetch(`${API_BASE_URL}/extracourse/${courseId}/${batchId}`, {
+//     method: 'DELETE',
+//     headers: { 'Content-Type': 'application/json' },
+//   });
+//   if (!response.ok) {
+//     throw new Error('Failed to delete extra course');
+//   }
+//   return response.json();
+// }
+
+// export async function deleteExtraCourse(courseId: string, batchId: string): Promise<{ message: string }> {
+//   try {
+//     const response = await fetch(`/api/extracourse/${courseId}/${batchId}`, {
+//       method: 'DELETE',
+//       headers: { 'Content-Type': 'application/json' },
+//     });
+
+//     if (!response.ok) {
+//       throw new Error('Failed to delete extra course');
+//     }
+
+//     return await response.json(); // Assuming the response returns a message
+//   } catch (error) {
+//     console.error('Error deleting extra course:', error);
+//     throw error; // Rethrow the error for further handling if needed
+//   }
+// }
+
+
+// batchid
+export async function getExtraCourseDetails(courseId: string, batchId: string): Promise<any> {
+  try {
+    const response = await fetch(`/api/extracourse/${courseId}/${batchId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch extra course details');
+    }
+
+    return await response.json(); // Assuming the response returns the extra course details
+  } catch (error) {
+    console.error('Error fetching extra course details:', error);
+    throw error; // Rethrow the error for further handling if needed
+  }
+}
+
+
+export async function getAllBatches(): Promise<Batch[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/batches`); // Adjust the URL as necessary
+    if (!response.ok) {
+      throw new Error('Failed to fetch batches');
+    }
+    return await response.json(); // Assuming the response returns an array of batches
+  } catch (error) {
+    console.error('Error fetching batches:', error);
+    throw error; // Rethrow the error for further handling if needed
+  }
+}
+
+export async function deleteExtraCourse(courseId: string, batchId: string): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`/api/extracourse/${courseId}/${batchId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete extra course');
+    }
+
+    return await response.json(); // Assuming the response returns a message
+  } catch (error) {
+    console.error('Error deleting extra course:', error);
+    throw error; // Rethrow the error for further handling if needed
+  }
+}
+
+export async function getExtraCourseIds(courseId: string, batchId: string): Promise<string[]> {
+  try {
+    const response = await fetch(`/api/extracourse/${courseId}/${batchId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch extra course details');
+    }
+
+    const data = await response.json();
+    return data.courseIds; // Return only course IDs
+  } catch (error) {
+    console.error('Error fetching extra course details:', error);
+    throw error;
   }
 }
