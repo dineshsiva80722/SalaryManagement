@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { getMonthName } from "@/lib/utils"
+import { updateBatchCourse } from "@/lib/api"; // Adjust the path as necessary
 import {
   getCourses,
   getAvailableBatches,
@@ -55,18 +56,20 @@ interface Batch {
   name: string
   year: number
   month: number
+  _id: string
 }
 
 
 
 interface BatchCourse {
-  id: string
-  name: string
-  lectureName: string
-  paymentStatus: String
-  salary: number
-  paidAmount: number
+  id: string;
+  name: string;
+  lectureName: string;
+  paymentStatus: string;
+  salary: number;
+  paidAmount: number;
 }
+
 
 interface BatchSalaryData {
   id: string;
@@ -170,11 +173,29 @@ export default function BatchDetailsManagement() {
   }, [fetchCourses]);
 
 
+  // useEffect(() => {
+  //   const fetchBatches = async () => {
+  //     if (!formData.course || !selectedYear || !formData.month) {
+  //       setAvailableBatches([]);
+  //       return;
+  //     }
+  //     try {
+  //       setIsLoadingBatches(true);
+  //       const batches = await getAvailableBatches(formData.course, selectedYear, formData.month);
+  //       setAvailableBatches(batches);
+  //       console.log('Fetched batches:', batches);
+  //     } catch (error) {
+  //       console.error('Error fetching batches:', error);
+  //       setError('Failed to fetch batches. Please try again.');
+  //     } finally {
+  //       setIsLoadingBatches(false);
+  //     }
+  //   };
+  
+  //   fetchBatches();
+  // }, [formData.course, formData.month, selectedYear]);
 
-
-
-
-
+  
   useEffect(() => {
     const fetchBatches = async () => {
       if (!formData.course || !selectedYear || !formData.month) {
@@ -184,8 +205,18 @@ export default function BatchDetailsManagement() {
       try {
         setIsLoadingBatches(true);
         const batches = await getAvailableBatches(formData.course, selectedYear, formData.month);
-        setAvailableBatches(batches);
-        console.log('Fetched batches:', batches);
+        
+        // Ensure batches is an array of Batch objects
+        const formattedBatches = batches.map((batch: any) => ({
+          id: batch.id || batch._id,
+          name: batch.name,
+          year: batch.year,
+          month: batch.month,
+          _id: batch._id
+        }));
+  
+        setAvailableBatches(formattedBatches);
+        console.log('Fetched batches:', formattedBatches);
       } catch (error) {
         console.error('Error fetching batches:', error);
         setError('Failed to fetch batches. Please try again.');
@@ -193,7 +224,7 @@ export default function BatchDetailsManagement() {
         setIsLoadingBatches(false);
       }
     };
-
+  
     fetchBatches();
   }, [formData.course, formData.month, selectedYear]);
 
@@ -282,32 +313,48 @@ export default function BatchDetailsManagement() {
     }
   };
 
-  const handleUpdateBatchCourse = async (courseId: string, updates: Partial<BatchCourse>) => {
-    try {
-      await updateBatchCourse(courseId, updates);
-      setBatchCourses((prevCourses) =>
-        prevCourses.map(course =>
-          course.id === courseId ? { ...course, ...updates } : course
-        )
-      );
-      setSuccess('Course updated successfully!');
-    } catch (error) {
-      console.error("Error updating batch course:", error);
-      setError("Failed to update batch course. Please try again.");
-    }
-  };
+  // const handleUpdateBatchCourse = async (courseId: string, updates: Partial<BatchCourse>) => {
+  //   try {
+  //     await updateBatchCourse(courseId, updates);
+  //     setBatchCourses((prevCourses) =>
+  //       prevCourses.map(course =>
+  //         course.id === courseId ? { ...course, ...updates } : course
+  //       )
+  //     );
+  //     setSuccess('Course updated successfully!');
+  //   } catch (error) {
+  //     console.error("Error updating batch course:", error);
+  //     setError("Failed to update batch course. Please try again.");
+  //   }
+  // };
+
+  // const handleUpdateBatchCourse = async (courseId: string, updates: Partial<BatchCourse>, batchId: string, courseIndex: number) => {
+  //   try {
+  //     await updateBatchCourse(courseId, updates, batchId, courseIndex);
+  //     setBatchCourseDetails((prevCourses) =>
+  //       prevCourses.map(course =>
+  //         course.id === courseId ? { ...course, ...updates } : course
+  //       )
+  //     );
+  //     setSuccess('Course updated successfully!');
+  //   } catch (error) {
+  //     console.error("Error updating batch course:", error);
+  //     setError("Failed to update batch course. Please try again.");
+  //   }
+  // };
+
 
   const handleAddBatchCourse = useCallback(async () => {
     if (!formData.batch) {
       setError('Please select a batch before adding a course');
       return;
     }
-
+  
     try {
       setSubmitting(true);
       setError(null);
       const response = await addBatchCourse(formData.course, formData.batch, newCourse);
-      if (!response.ok) {
+      if (!response) {
         throw new Error('Failed to add course to batch');
       }
       setSuccess('Course added successfully!');
@@ -326,6 +373,8 @@ export default function BatchDetailsManagement() {
       setSubmitting(false);
     }
   }, [formData.course, formData.batch, newCourse]);
+
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

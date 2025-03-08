@@ -13,14 +13,13 @@ interface Staff {
   name: string
 }
 
-type WorkStatus = "Not Started" | "In Progress" | "Incomplete" | "Complete";
+
 type PaymentStatus = "Pending" | "Done";
 
 interface BatchCourse {
   id: string
   name: string
   lectureName: string
-  workStatus: WorkStatus
   salary: number
   paidAmount: number
   paymentStatus: PaymentStatus
@@ -61,7 +60,6 @@ export interface BatchDetail {
   id: string
   courseName: string
   lectureName: string
-  workStatus: string
   paymentStatus: string
   salary: number
   paidAmount: number
@@ -87,7 +85,6 @@ let courses: Course[] = [
             id: "1",
             name: "HTML",
             lectureName: "John Doe",
-            workStatus: "Complete",
             salary: 1000,
             paidAmount: 1000,
             paymentStatus: "Done",
@@ -96,7 +93,6 @@ let courses: Course[] = [
             id: "2",
             name: "CSS",
             lectureName: "Jane Smith",
-            workStatus: "In Progress",
             salary: 1200,
             paidAmount: 600,
             paymentStatus: "Pending",
@@ -105,7 +101,6 @@ let courses: Course[] = [
             id: "3",
             name: "JavaScript",
             lectureName: "Bob Johnson",
-            workStatus: "Not Started",
             salary: 800,
             paidAmount: 0,
             paymentStatus: "Pending",
@@ -123,7 +118,6 @@ let courses: Course[] = [
             id: "4",
             name: "React",
             lectureName: "Alice Brown",
-            workStatus: "Not Started",
             salary: 1500,
             paidAmount: 0,
             paymentStatus: "Pending",
@@ -132,7 +126,6 @@ let courses: Course[] = [
             id: "5",
             name: "Node.js",
             lectureName: "Charlie Green",
-            workStatus: "Not Started",
             salary: 1300,
             paidAmount: 0,
             paymentStatus: "Pending",
@@ -426,26 +419,62 @@ export async function getBatchDetails(
   return response.json();
 }
 
-export async function updateBatchCourse(
-  courseId: string,
-  batchId: string,
-  courseIndex: number,
-  updates: Partial<BatchCourse>,
-): Promise<void> {
-  const response = await fetch(
-    `${API_BASE_URL}/courses/${courseId}/batches/${batchId}/courses/${courseIndex}`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updates),
-    }
-  );
+
+
+// export async function updateBatchCourse(
+//   courseId: string,
+//   batchId: string,
+//   courseIndex: number,
+//   updates: Partial<BatchCourse>,
+// ): Promise<void> {
+//   const response = await fetch(
+//     `${API_BASE_URL}/courses/${courseId}/batches/${batchId}/courses/${courseIndex}`,
+//     {
+//       method: 'PATCH',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(updates),
+//     }
+//   );
+//   if (!response.ok) {
+//     throw new Error('Failed to update batch course');
+//   }
+// }
+
+// Example of updateBatchCourse function
+// export const updateBatchCourse = async (courseId: string, updates: Partial<BatchCourse>, batchId: string, courseIndex: number) => {
+//   const response = await fetch(`/api/courses/${courseId}`, {
+//     method: "PUT",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({ updates, batchId, courseIndex }),
+//   });
+
+//   if (!response.ok) {
+//     throw new Error("Failed to update batch course");
+//   }
+
+//   return await response.json();
+// };
+
+// Example of updateBatchCourse function
+export const updateBatchCourse = async (courseId: string, updates: Partial<BatchCourse>, batchId: string, courseIndex: number) => {
+  const response = await fetch(`/api/courses/${courseId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ updates, batchId, courseIndex }),
+  });
+
   if (!response.ok) {
-    throw new Error('Failed to update batch course');
+    throw new Error("Failed to update batch course");
   }
-}
+
+  return await response.json();
+};
 
 export async function deleteBatchCourse(
   courseId: string,
@@ -669,6 +698,8 @@ export async function getAvailableBatches(courseId: string, year: number, month:
   }
   return response.json();
 }
+
+
 
 export async function fetchSchedule() {
   try {

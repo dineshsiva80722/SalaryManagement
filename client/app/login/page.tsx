@@ -22,7 +22,7 @@ export default function LoginPage() {
     setError("")
     try {
       await login(username, password)
-      router.push('/lecturer/dashboard')
+      router.push('/superadmin/dashboard')
     } catch (err) {
       console.error("Login error:", err)
       setError(err instanceof Error ? err.message : "An unexpected error occurred during login")

@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ScreenshotUploader } from "@/components/ScreenshotUploader"
-import { ExportButtons } from "@/components/ExportButtons"
 import { getBatchDetails, updateBatchCourse } from "@/lib/api"
 import { Loader2 } from "lucide-react"
 
@@ -147,14 +145,6 @@ export default function BatchDetails({ courseId, month, year, batchId }: BatchDe
                 <p>Paid Amount: {formatINR(course.paidAmount)}</p>
                 <p>Pending Amount: {formatINR(course.salary - course.paidAmount)}</p>
               </div>
-              {course.paymentStatus !== "Done" && (
-                <div className="mt-4">
-                  <ScreenshotUploader
-                    batchDetailId={`${courseId}-${batchId}-${index}`}
-                    onUploadComplete={(screenshotUrl) => handleScreenshotUpload(index, screenshotUrl)}
-                  />
-                </div>
-              )}
               {course.paymentScreenshot && (
                 <div className="mt-4">
                   <img
@@ -167,19 +157,7 @@ export default function BatchDetails({ courseId, month, year, batchId }: BatchDe
             </CardContent>
           </Card>
         ))}
-        <ExportButtons
-          data={batchCourses.map((course) => ({
-            id: course.id,
-            courseName: course.name,
-            lectureName: course.lectureName,
-            workStatus: course.workStatus,
-            paymentStatus: course.paymentStatus,
-            totalSalary: course.salary,
-            paidSalary: course.paidAmount,
-            paymentScreenshot: course.paymentScreenshot,
-          }))}
-          fileName={`Batch_${batchId}_Statement`}
-        />
+  
       </CardContent>
     </Card>
   )
