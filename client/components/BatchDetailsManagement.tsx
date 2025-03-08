@@ -708,14 +708,10 @@ export default function BatchDetailsManagement() {
 
       <section className="">
         <section>
-          <h2 className="text-2xl font-bold">Batch and Salary Overview</h2>
+          <h2 className="text-2xl font-bold">Extra Course Overview</h2>
           <Table className="text-center">
             <TableHeader>
               <TableRow>
-                <TableHead>Course Name</TableHead>
-                <TableHead>Batch Name</TableHead>
-                <TableHead>Year</TableHead>
-                <TableHead>Month</TableHead>
                 <TableHead>Lecturer Name</TableHead>
                 <TableHead>Lecturer Course</TableHead>
                 <TableHead>Salary</TableHead>
@@ -727,10 +723,6 @@ export default function BatchDetailsManagement() {
             <TableBody>
               {batchSalaryData.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.courseName}</TableCell>
-                  <TableCell>{item.batchName}</TableCell>
-                  <TableCell>{item.year}</TableCell>
-                  <TableCell>{new Date(2000, item.month - 1).toLocaleString("default", { month: "long" })}</TableCell>
                   <TableCell>{item.lectureName}</TableCell> {/* Ensure this is correctly referenced */}
                   <TableCell>{item.lectureCourse}</TableCell> 
                   <TableCell>{item.salary}</TableCell>
@@ -741,7 +733,7 @@ export default function BatchDetailsManagement() {
                       <button
                         className="bg-red-500 p-2 px-5 mx-2 rounded-lg"
                         onClick={async () => {
-                          const confirmDelete = window.confirm(`Are you sure you want to delete the batch?\nBatch Name: ${item.batchName}\nCourse Name: ${item.courseName}\nYear: ${item.year}\nMonth: ${new Date(2000, item.month - 1).toLocaleString("default", { month: "long" })}\nLecturer Name: ${item.lectureName}\nLecturer Course: ${item.lectureCourse}\nSalary: ${item.salary}\nPaid Amount: ${item.paidAmount}\nPayment Status: ${item.paymentStatus}`);
+                          const confirmDelete = window.confirm(`\nLecturer Name: ${item.lectureName}\nLecturer Course: ${item.lectureCourse}\nSalary: ${item.salary}\nPaid Amount: ${item.paidAmount}\nPayment Status: ${item.paymentStatus}`);
                           if (confirmDelete) {
                             try {
                               await handleDeleteBatch(item.courseId, item.id); // Ensure item has courseId and id properties

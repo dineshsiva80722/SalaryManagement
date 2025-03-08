@@ -145,8 +145,7 @@ export default function AdminDashboard() {
   if (!user || user.role !== "admin") return null
 
   // Mock data for total and pending payments (replace with actual data as needed)
-  const totalPayment = 10000; // Example total payment
-  const pendingPayments = 2000; // Example pending payments
+
 
   return (
     <main className="container mx-auto p-4">
@@ -162,25 +161,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="batchDetails">Batch Details</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
-          {/* Payment Details Section */}
-          <div className="flex space-x-4 mb-4">
-            <Card className="w-1/2">
-              <CardHeader>
-                <CardTitle>Total Payment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg"><strong>${totalPayment}</strong></p>
-              </CardContent>
-            </Card>
-            <Card className="w-1/2">
-              <CardHeader>
-                <CardTitle>Pending Payments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg"><strong>${pendingPayments}</strong></p>
-              </CardContent>
-            </Card>
-          </div>
+       
           <BatchSalaryOverview />
         </TabsContent>
         <TabsContent value="courses">
